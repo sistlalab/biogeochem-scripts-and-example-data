@@ -1,0 +1,196 @@
+---
+title: "soil respiration_incubation"
+author: "Sistla, Seeta and Pold, Grace"
+date: '2022-06-30'
+output: html_document
+---
+## Load required packages
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = 'C:/Users/ssistla/Desktop')
+library(lme4)
+require(readxl)
+require(reshape2)
+require(ggplot2)
+require(qqplotr)
+library(nlme)
+library(lmerTest)
+library(car)
+library(ggstatsplot)
+library(lubridate)
+library(ggpubr)
+library(tidyverse)
+```
+
+
+load respiration data file (licor data and soil moisture, remove all blanks from soil moisture using 'na.omit') 
+You must have completed gravimetric moisture before running this script, should be done in parallel with SIR
+your file should be identical in structure to the example data
+```{r} 
+Respiration<- read_excel("biogeochem_example.xlsx", 
+                 sheet = "Basal_Respiration") [,1:13]
+
+Soil_Moisture <- read_excel("biogeochem_example.xlsx", 
+                            sheet = "Soil_Moisture") [,c(1, 6:12)]
+
+
+Soil_Moisture_ave <- Soil_Moisture %>%                                     
+  group_by(Soil_ID) %>%
+  summarize('Average_DryMass/WetMass' = mean(`Dry Mass/Wet Mass`)) %>% 
+  as.data.frame()
+Soil_Moisture_ave
+
+
+
+```
+
+## change time measured on respiration to hour from time 0, time 1 (2 hours), time 2 (4 hours) (if more than 3 time points adjust accordingly) in hours (i.e., T4 - T0, T3-T0, T2-T0, etc.)
+
+```{r}
+Respiration$Time2hrs<-ymd_hms(Respiration$Time2hrs)-ymd_hms(Respiration$TimeZero)
+Respiration$Time4hrs<-ymd_hms(Respiration$Time4hrs)-ymd_hms(Respiration$TimeZero)
+Respiration$TimeZero<-0
+```
+
+## separate out sample ID info, mass, hour, and ppm (respiration) for each time point. If more than three time points adjust accordingly.  Then create one long form file with all time points for all samples ('SIR_all'). Create unique ID for pseudoreplicates A and B
+
+
+```{r}
+Respiration0<-Respiration[,1:9]
+Respiration2<-Respiration[,c(1:7, 10,11)]
+Respiration4<-Respiration[,c(1:7, 12,13)]
+
+names(Respiration2)<-names(Respiration0)
+names(Respiration4)<-names(Respiration0)
+
+Respiration_all<-rbind(Respiration0, Respiration2, Respiration4)
+Respiration_all$uniqueID<-paste(Respiration_all$`Soil_ID`, Respiration_all$Pseudoreplicate, sep="_")
+
+```
+
+
+#gsub is what you want to replace with what you want to replace it 
+#make an empty dataframe to put the regression fits for Co2 vs. time slopes in 
+#[Number before the *] and ncol= should equal the number of columns on metadata on Respiration_all (everything except time & ppmCO2) + 4 
+```{r}
+names(Respiration_all)<-gsub(" ", "_", names(Respiration_all))
+outframe<-matrix(rep(NA, times=12*nrow(Respiration_all)/3), ncol = 12)
+```
+
+
+## Run loop to calculate respiration slope (CO2ppm /hr)
+
+```{r}
+i<-1
+for(sampleid in unique(Respiration_all$uniqueID)){
+  datsub<-subset(Respiration_all, uniqueID==sampleid)#subsetting to get data just for sample of interest
+  ModFit<-summary(lm(T0_ppm_CO2~TimeZero, datsub))#fit a linear model to determine slope
+  outframe[i,]<- unlist(c(datsub[1,1:7], sampleid, ModFit$r.squared, ModFit$coefficients[2], ModFit$coefficients[4], ModFit$coefficients[8]))
+  #extract the parameters of interest (ie slope, Rsq and p-values for slope) and save to a new dataframe
+  plot(T0_ppm_CO2~TimeZero, data = datsub, main=sampleid)
+  abline(lm(T0_ppm_CO2~TimeZero, data = datsub), col="red")
+  i<-i+1
+}
+
+```
+## name outframe data columns as labeled in metadata sheet, change columns to numeric or character as appropriate
+
+```{r}
+outframe<-as.data.frame(outframe) #Changes from a matrix to a data frame
+names(outframe)<-c("Soil_ID", "Pseudoreplicate", "Block", "Plastic_Association", "Mulch_Thickness", "BDM_Maker", "Soil_wet_wt", "uniqueID", "r.squared", "slope", "SE", "slope_pval")
+outframe[,c(7,9:12)]<- sapply(outframe[,c(7,9:12)],as.character)
+outframe[,c(7,9:12)]<- sapply(outframe[,c(7,9:12)],as.numeric)
+```
+
+## QA/QC to remove linear relationships that are not strong (P value <0.2). Do not subtract out negative control, but check that CO2 level was not changing in a meanigful way (i.e, increasing with strong slope)! 
+#You should stop at this point and see how many reps are lost from yoru data, if remaining resp have reasonable slopes.  It is good to QA/AC as data is collected 
+
+```{r}
+outframe_good<-subset(outframe, slope_pval<=0.2)
+
+```
+
+#Divide slopes by wet soil weight
+divide by the dry/wet to get respiration per g dry soil per hr
+
+# Convert from µM (ppm) to µg C-CO2
+Assume 236.6 mls of volume (8fl oz jar) and the room was 20 ˚C, n*1000 (mmol air) = PV/RT 
+This yields: [ (9.84*0.001*12) * ppm CO2]/ (dry weight soil * hr)
+YOU MUST CHANGE THE # 9.84 if using a different jar!
+convert to per day (*24 hours/day)
+
+
+
+```{r}
+outframe_good$slope_wetSoil<-outframe_good$slope/outframe_good$Soil_wet_wt
+
+FinalRespiration<-merge(outframe_good,Soil_Moisture_ave,by = "Soil_ID")
+FinalRespiration$slope_wetsoil_hours<-FinalRespiration$slope_wetSoil
+FinalRespiration$Dry_Respiration<-FinalRespiration$slope_wetsoil_hours/FinalRespiration$`Average_DryMass/WetMass` 
+
+FinalRespiration$ugC_CO2_gsoil_hr<-FinalRespiration$Dry_Respiration*9.84*0.001*12
+FinalRespiration$ugC_CO2_gsoil_day<- FinalRespiration$ugC_CO2_gsoil_hr*24
+ 
+
+final_ave_Respiration <- FinalRespiration %>%                                     
+  group_by(Soil_ID) %>%
+  summarize(Respiration_ave_hr = mean(ugC_CO2_gsoil_hr), Respiration_ave_day = mean(ugC_CO2_gsoil_day)) %>% 
+  as.data.frame()
+final_ave_Respiration
+
+```
+
+
+#create unique ID (soilID_A) and adding to final_ave_sIR data frame, merge with 'FinalSIR data frame that has all other relevant info, remove meaningles columns ('new col' and 'Soil_ID which will be duplicated)
+## write final SIR file
+```{r}
+replicate<- rep(c("A"), 25)
+
+final_ave_Respiration<- final_ave_Respiration  %>%  
+  mutate(newcol = replicate)   
+  
+ 
+final_ave_Respiration$uniqueID<-paste(final_ave_Respiration$`Soil_ID`, final_ave_Respiration$newcol, sep="_")
+final_ave_Respiration<- select(final_ave_Respiration, -newcol)
+final_ave_Respiration<- select(final_ave_Respiration, -Soil_ID)
+                            
+FinalAveRespiration <- merge(FinalRespiration,final_ave_Respiration,by="uniqueID", all.x = TRUE)
+write.csv(FinalAveRespiration, "FinalRespiration_EXAMPLE.csv")
+```
+
+
+#SIR Plot by plastic association
+
+
+```{r} 
+Respirationplot<- ggplot(FinalAveRespiration, aes(x=Plastic_Association,y=Respiration_ave_day))+ geom_boxplot()+
+  theme_bw() + 
+  theme(panel.grid = element_blank(), legend.position = "none")+
+  labs(x = '', y = (expression(soil~respiration~(mu~g~CO[2]~-C~g^{"-1"}~soil~day^{"-1"}))))
+Respirationplot
+```
+
+
+
+
+#Read back in data
+#Combine with metadata to fix 1.1 issue
+
+FinalSIR<-read_excel("FinalSIR_Corralitos.xlsx")
+
+
+
+meta<-read_excel("Corralitos_Metadata_112021.xlsx", 
+                 sheet = "Metadata", col_types = c("text", 
+                                                   "numeric", "text", "numeric", "text"))
+FinalSIR<-merge(FinalSIR,meta, by = "Soil_ID")
+
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
