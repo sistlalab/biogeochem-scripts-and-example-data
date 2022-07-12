@@ -4,14 +4,18 @@ Format your data exactly this way or the scripts will not run!
 For lab set up, basic soil processing you must have been completed.
 
 **Metadata file**: note of project objectives, sample layout, depth and width samples, number of samples, labeling scheme, timing, personnel, how samples were processed and where archived.
-**All (soil) samples need at a minimum**:
- * # of replicates per treatment, pseudoreplicates if applicable (i.e., pseudoreplicates for SIR-biomass, respiration, extractable nutrients)
+All (soil) samples need at a minimum:
+ * nu,ber of replicates per treatment, pseudoreplicates if applicable (i.e., pseudoreplicates for SIR-biomass, respiration, extractable nutrients)
  * total collected fresh weight (g) per sample
  * sample depth and width, or area if sampling surface plant biomass
  * gravimetric soil moisture on subsample of each sample
  * pH on subsample of each sample
  * whether sieved or not and sieving protocol
  * What downstream analyses are done/to be done (e.g., extractable nutrients, pH, gravmiteric soil moisture, enzyme assays, DNA extractions, respiration, microbial biomass, percent C/N, etc.)
+
+After running standard curves, always check to see R^2 are high >> 0.97  (i.e., for respiration, SIR-biomass, POXC, inorganic nutrients, enzyme assays). When you have analyzed your data, confirm the analyses are within reasonable ranges from other similar data sets:
+https://cpslo-my.sharepoint.com/:p:/g/personal/ssistla_calpoly_edu/Ef9cJ9DEl1NKn6Xam74VtzsBNvZXCMU6VGIyMzJBMXC3Tw?e=hF7mNZ
+
 
 
 # respiration/microbial biomass C, mason jar incubations
