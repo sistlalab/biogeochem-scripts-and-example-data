@@ -1,8 +1,18 @@
-
 All example data in 'biogeochem_example.xlsx'
 Format your data exactly this way or the scripts will not run! 
 
-# respiration/microbial biomass C, jar incubations
+For lab set up, basic soil processing you must have been completed.
+Meta data file: note of project objectives, sample layout, depth and width samples, number of samples, labeling scheme, timing, personnel, how samples were processed and where archived.
+All soil samples need at a minimum:
+ * total collected fresh weight (g) per sample
+ * sample depth and width 
+ * gravimetric soil moisture on subsample of each sample
+ * pH on subsample of each sample
+ * whether sieved or not and sieving protocol
+ * What downstream analyses are done/to be done (e.g., extractable nutrients, pH, gravmiteric soil moisture, enzyme assays, DNA extractions, respiration, microbial biomass)
+
+
+# respiration/microbial biomass C, mason jar incubations
 incubation and field respiration flux code
 
 This folder contains R scripts for calculation incubation and field CO2 flux, (ugCO2-C/ g soil*time) as well as soil microbial biomass from substrate induced respiration (ug C/ g soil)
@@ -14,7 +24,7 @@ To run this code, you must always:
 4) check to see your values are in line with realistic data from the field! 
 
 
-#permanganate oxidizable carbon (POXC) -  fraction of the SOM pool that is oxidizable in the presence of potassium permanganate in solution. (https://lter.kbs.msu.edu/protocols/133)
+# permanganate oxidizable carbon (POXC) -  fraction of the SOM pool that is oxidizable in the presence of potassium permanganate in solution. (https://lter.kbs.msu.edu/protocols/133)
 
 To run this code, you must always follow protocol and have:
 1)  recorded soil air weight in kg that was used in the POXC reaction
