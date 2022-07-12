@@ -2,15 +2,16 @@ All example data in: 'biogeochem_example.xlsx'
 Format your data exactly this way or the scripts will not run! 
 
 For lab set up, basic soil processing you must have been completed.
-Meta data file: note of project objectives, sample layout, depth and width samples, number of samples, labeling scheme, timing, personnel, how samples were processed and where archived.
-All (soil) samples need at a minimum:
+
+**Metadata file**: note of project objectives, sample layout, depth and width samples, number of samples, labeling scheme, timing, personnel, how samples were processed and where archived.
+**All (soil) samples need at a minimum**:
  * # of replicates per treatment, pseudoreplicates if applicable (i.e., pseudoreplicates for SIR-biomass, respiration, extractable nutrients)
  * total collected fresh weight (g) per sample
  * sample depth and width, or area if sampling surface plant biomass
  * gravimetric soil moisture on subsample of each sample
  * pH on subsample of each sample
  * whether sieved or not and sieving protocol
- * What downstream analyses are done/to be done (e.g., extractable nutrients, pH, gravmiteric soil moisture, enzyme assays, DNA extractions, respiration, microbial biomass)
+ * What downstream analyses are done/to be done (e.g., extractable nutrients, pH, gravmiteric soil moisture, enzyme assays, DNA extractions, respiration, microbial biomass, percent C/N, etc.)
 
 
 # respiration/microbial biomass C, mason jar incubations
@@ -31,4 +32,4 @@ To run this code, you must always follow protocol and have:
 1)  recorded soil air weight in kg that was used in the POXC reaction
 2)  run a standard curve (see example of standard POXC curve here: https://cpslo-my.sharepoint.com/:p:/g/personal/ssistla_calpoly_edu/EYifgo2Y48hNnkb9PsXT4hwBmQSNKMfBewx2RHiS9WJF3w?e=Nq5aAu)
 3)  recorded the tecan absorbance data at 550 nm
- 
+ 4) check to see your values are in line with realistic data from the field! 
