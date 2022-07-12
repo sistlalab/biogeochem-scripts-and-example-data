@@ -1,11 +1,12 @@
-All example data in 'biogeochem_example.xlsx'
+All example data in: 'biogeochem_example.xlsx'
 Format your data exactly this way or the scripts will not run! 
 
 For lab set up, basic soil processing you must have been completed.
 Meta data file: note of project objectives, sample layout, depth and width samples, number of samples, labeling scheme, timing, personnel, how samples were processed and where archived.
-All soil samples need at a minimum:
+All (soil) samples need at a minimum:
+ * # of replicates per treatment, pseudoreplicates if applicable (i.e., pseudoreplicates for SIR-biomass, respiration, extractable nutrients)
  * total collected fresh weight (g) per sample
- * sample depth and width 
+ * sample depth and width, or area if sampling surface plant biomass
  * gravimetric soil moisture on subsample of each sample
  * pH on subsample of each sample
  * whether sieved or not and sieving protocol
