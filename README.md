@@ -5,7 +5,7 @@ For lab set up, basic soil processing you must have been completed.
 
 **Metadata file**: note of project objectives, sample layout, depth and width samples, number of samples, labeling scheme, timing, personnel, how samples were processed and where archived.
 All (soil) samples need at a minimum:
- * nu,ber of replicates per treatment, pseudoreplicates if applicable (i.e., pseudoreplicates for SIR-biomass, respiration, extractable nutrients)
+ * number of replicates per treatment, pseudoreplicates if applicable (i.e., pseudoreplicates for SIR-biomass, respiration, extractable nutrients)
  * total collected fresh weight (g) per sample
  * sample depth and width, or area if sampling surface plant biomass
  * gravimetric soil moisture on subsample of each sample
