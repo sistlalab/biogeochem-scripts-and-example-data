@@ -1,3 +1,7 @@
+**I am new to R/Rstudio, where do I start?**
+Follow this course to gain basic familiarity in R: https://datacarpentry.org/R-ecology-lesson/index.html
+
+
 All example data in: 'biogeochem_example.xlsx'
 Format your data exactly this way or the scripts will not run! 
 
