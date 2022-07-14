@@ -1,0 +1,138 @@
+---
+title: "Ammonium"
+author: "Sistla, Seeta and Pold, Grace"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+ knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = 'C:/Users/ssistla/Desktop')
+library(lme4)
+require(readxl)
+require(reshape2)
+require(ggplot2)
+require(qqplotr)
+library(nlme)
+library(lmerTest)
+library(car)
+library(ggstatsplot)
+library(lubridate)
+library(ggpubr)
+library(tidyverse)
+require(readxl)
+require(reshape2)
+```
+
+##Standard curve regression chunk
+
+```{r}
+ggplotRegression <- function (fit) {
+
+require(ggplot2)
+
+ggplot(fit$model, aes_string(x = names(fit$model)[2], y = names(fit$model)[1])) + 
+  geom_point() +
+  stat_smooth(method = "lm", col = "red") +
+  labs(title = paste("Adj R2 = ",signif(summary(fit)$adj.r.squared, 5),
+                     "Intercept =",signif(fit$coef[[1]],5 ),
+                     " Slope =",signif(fit$coef[[2]], 5),
+                     " P =",signif(summary(fit)$coef[2,4], 5)))
+}
+```
+
+
+##import NH4 data from TECAN, plate plan for NH4, soil moisture
+```{r }
+
+plateplanNH4<-read_excel("biogeochem_example.xlsx", 
+                         sheet = "NH4_plateplan") [,1:4]
+
+plateplanNH4<-na.omit(plateplanNH4)
+
+NH4<-read_excel("biogeochem_example.xlsx", 
+                         sheet = "NH4_tecan")[26:33,]
+names(NH4)<-c("row", 1:12)
+NH4[,2:13]<-lapply(NH4[,2:13],as.numeric)
+
+NH4_melt<-melt(NH4)
+names(NH4_melt)[2]<-"column"
+NH4_melt<-merge(NH4_melt, plateplanNH4, by=c("row", "column"))
+
+
+
+
+Soil_Moisture <- read_excel("biogeochem_example.xlsx", 
+                            sheet = "Soil_Moisture") [,c(1, 6:12)]
+Soil_Moisture_ave <- Soil_Moisture %>%                                     
+  group_by(Soil_ID) %>%
+  summarize('Average_DryMass/WetMass' = mean(`Dry Mass/Wet Mass`)) %>% 
+  as.data.frame()
+Soil_Moisture_ave
+```
+
+##extract standards from NH4  plate
+#check the slope and R2 visually by plotting, save skope and intercept to calculate ppm NH4
+#subset samples that are not standards from NH4_melt data drame and caclulate ppm NH4 from standard curve!
+
+
+```{r}
+ 
+stds<-subset(NH4_melt, `sample position`=="standard")
+stds$Soil_ID<-as.numeric(as.character(stds$Soil_ID))
+stdcurve<-summary(lm(Soil_ID~value, stds))
+ggplotRegression(lm(Soil_ID~value, stds))
+plot(Soil_ID~value, stds)
+
+slope<-stdcurve$coefficients[2]
+intercept<-stdcurve$coefficients[1]
+
+samples<-subset(NH4_melt, !`sample position`=="standard")
+samples$ppmNH4<-samples$value*slope+intercept
+```
+
+#find means for each sample:
+# To convert to µg NO 3 g -1 of soil, first, note that ppm is the same as µg ml -1 . 
+#Multiply µg ml -1 NO3 from the microplate assay by the ml of extractant (KCl) solution and divide by g dry soil. Divide by 1000 to get to mg NO3 / g soil
+#subtract out extract blank (neg control)
+```{r}
+
+meansNH4<-aggregate(ppmNH4~Soil_ID, samples, "mean")
+meansNH4$mgNH4_perExtraction<-meansNH4$ppmNH4*20/1000
+meansNH4$mgNH4_perExtraction<-meansNH4$mgNH4_perExtraction-subset(meansNH4, Soil_ID=="NEG")$mgNH4_perExtraction
+```
+
+
+#metadata (this merge will also get rid of empty wells and negative control wells)
+#merge metadata with means, merge means with soil moisture ave
+#convert to mg NH4/kg dry soil
+#convert to mg NH4-N/kg dry soil (molecular weight of N/NH4 =14.0067 /18.03806 = 0.7765 
+#check range is normative (0-5 mg NH4-N/kg soil)
+
+```{r}
+metadata<-read_excel("biogeochem_example.xlsx", 
+                         sheet = "extractable_nuts_weight") [,1:6]
+ 
+meansNH4<-merge(meansNH4, metadata, by.x="Soil_ID", by.y="Soil_ID")
+meansNH4<-merge(meansNH4,Soil_Moisture_ave,by = "Soil_ID")
+
+meansNH4$mg_g_wetSoil<-meansNH4$mgNH4_perExtraction/meansNH4$'Mass (g)'
+meansNH4$mg_g_drySoil<-meansNH4$mg_g_wetSoil/meansNH4$'Average_DryMass/WetMass'
+meansNH4$mgNH4_kg_drySoil<- meansNH4$mg_g_drySoil*1000
+meansNH4$mgNH4_N_kg_drySoil<- meansNH4$mgNH4_kg_drySoil *(14.0067 /18.03806)
+write.csv(meansNH4, "FinalNH4_EXAMPLE.csv")
+```
+
+
+#NO3 Plot by plastic association
+
+
+```{r} 
+NH4plot<- ggplot((meansNH4), aes(x=Plastic_Association,y=mgNH4_N_kg_drySoil))+ geom_boxplot()+
+  theme_bw() + 
+  theme(panel.grid = element_blank(), legend.position = "none")+
+  labs(x = '', y = (expression(soil~nitrate~(mg~NH[4]~-N~~kg^{"-1"}~soil))))
+NH4plot
+```
+ 
+ 
