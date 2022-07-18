@@ -1,5 +1,6 @@
 **I am new to R/Rstudio, where do I start?**
 Follow this course to gain basic familiarity in R: https://datacarpentry.org/R-ecology-lesson/index.html
+What is Git, Github? https://happygitwithr.com/big-picture.html
 
 Follow this to gain familiarity with integrating R and Git(hub): https://afredston.github.io/learn-git/learn-git.html
 
