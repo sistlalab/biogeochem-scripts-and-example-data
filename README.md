@@ -41,3 +41,4 @@ To run this code, you must always follow protocol and have:
 2)  run a standard curve (see example of standard POXC curve here: https://cpslo-my.sharepoint.com/:p:/g/personal/ssistla_calpoly_edu/EYifgo2Y48hNnkb9PsXT4hwBmQSNKMfBewx2RHiS9WJF3w?e=Nq5aAu)
 3)  recorded the tecan absorbance data at 550 nm
  4) check to see your values are in line with realistic data from the field! 
+https://cpslo-my.sharepoint.com/:p:/g/personal/ssistla_calpoly_edu/Ef9cJ9DEl1NKn6Xam74VtzsBNvZXCMU6VGIyMzJBMXC3Tw?e=AK54lf
