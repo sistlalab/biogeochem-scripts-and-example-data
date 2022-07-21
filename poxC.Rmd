@@ -82,6 +82,7 @@ Calculate POXC (mg/kg soil) by  air dry  soil weight, corrected by slope, interc
 POXC_means<- merge(POXCweight, means, by.x = "Soil_ID", by.y = "Soil_ID")
 
 POXC_means$POXC_mgkgsoil <- (0.02 - (intercept + (slope * POXC_means$value))) * (9000)* (0.02/POXC_means$`Weight (kg)`)
+write.csv(POXC_means, "FinalPOXC_EXAMPLE.csv")
 
 ```
  
